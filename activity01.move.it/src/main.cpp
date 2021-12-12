@@ -1,0 +1,138 @@
+/*
+ * Activity 01 -- Move it!
+ */ 
+
+#include <Arduino.h>
+#include <wpi-32u4-lib.h>
+
+#include <IRdecoder.h>
+#include <ir_codes.h>
+
+#include <Chassis.h>
+
+// Declare a chassis object with nominal dimensions
+Chassis chassis(7.0, 1440, 14.9);
+
+// Setup the IR receiver/decoder object
+const uint8_t IR_DETECTOR_PIN = 1;
+IRDecoder decoder(IR_DETECTOR_PIN);
+
+// Helper function for debugging
+#define LED_PIN 13
+void setLED(bool value)
+{
+  Serial.println("setLED()");
+  digitalWrite(LED_PIN, value);
+}
+
+// Define the robot states
+enum ROBOT_STATE {ROBOT_IDLE, ROBOT_DRIVE_FOR};
+ROBOT_STATE robotState = ROBOT_IDLE;
+
+// idle() stops the motors
+void idle(void)
+{
+  Serial.println("idle()");
+  setLED(LOW);
+
+  //stop motors -- I use setEffort so that the wheels aren't locked
+  chassis.idle();
+
+  //set state to idle
+  robotState = ROBOT_IDLE;
+  Serial.println("/idle()");
+}
+
+/*
+ * This is the standard setup function that is called when the board is rebooted
+ * It is used to initialize anything that needs to be done once.
+ */
+void setup() 
+{
+  // This will initialize the Serial at a baud rate of 115200 for prints
+  // Be sure to set your Serial Monitor appropriately
+  Serial.begin(115200);
+
+  // initialize the chassis (which also initializes the motors)
+  chassis.init();
+  idle();
+
+  //these can be undone for the student to adjust
+  chassis.setMotorPIDcoeffs(5, 0.5);
+
+  // initialize the IR decoder
+  decoder.init();
+
+  Serial.println("/setup()");
+}
+
+float speed = 50;
+
+// A helper command to drive a set distance
+void drive(float dist, float speed)
+{
+  setLED(HIGH);
+  robotState = ROBOT_DRIVE_FOR;
+  chassis.driveFor(dist, speed);
+}
+
+// A helper function to turn a set angle
+void turn(float ang, float speed)
+{
+  setLED(HIGH);
+  robotState = ROBOT_DRIVE_FOR;
+  chassis.turnFor(ang, speed);
+}
+
+// Used to check if the motions above are complete
+void handleMotionComplete(void)
+{
+  idle();
+}
+
+// Handles a key press on the IR remote
+void handleKeyPress(int16_t keyPress)
+{
+  Serial.println("Key: " + String(keyPress));
+
+  //INFO idles, regardless of state -- E-stop
+  if(keyPress == ENTER_SAVE) idle(); 
+
+  switch(robotState)
+  {
+    case ROBOT_IDLE:
+      if(keyPress == UP_ARROW) drive(50, 10);
+      else if(keyPress == DOWN_ARROW) drive(-50, 10);
+      else if(keyPress == LEFT_ARROW) turn(90, 45);
+      else if(keyPress == RIGHT_ARROW) turn(-90, 45);
+      break;
+      
+    default:
+      break;
+  }
+}
+
+/*
+ * The main loop for the program. The loop function is repeatedly called
+ * after setup() is complete.
+ */
+void loop()
+{
+  // Call chassis.loop() to update the chassis, motors, etc.
+  chassis.loop();
+
+  // Check for a key press on the remote
+  int16_t keyPress = decoder.getKeyCode();
+  if(keyPress >= 0) handleKeyPress(keyPress);
+
+  // A basic state machine
+  switch(robotState)
+  {
+    case ROBOT_DRIVE_FOR: 
+       if(chassis.checkMotionComplete()) handleMotionComplete(); 
+       break;
+
+    default:
+      break;
+  }
+}
