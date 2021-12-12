@@ -66,8 +66,6 @@ void setup()
   Serial.println("/setup()");
 }
 
-float speed = 50;
-
 // A helper command to drive a set distance
 void drive(float dist, float speed)
 {
@@ -95,7 +93,7 @@ void handleKeyPress(int16_t keyPress)
 {
   Serial.println("Key: " + String(keyPress));
 
-  //INFO idles, regardless of state -- E-stop
+  //ENTER_SAVE idles, regardless of state -- E-stop
   if(keyPress == ENTER_SAVE) idle(); 
 
   switch(robotState)
