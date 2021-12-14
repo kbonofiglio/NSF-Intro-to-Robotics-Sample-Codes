@@ -29,13 +29,13 @@ void setLED(bool value)
 enum ROBOT_STATE {ROBOT_IDLE, ROBOT_DRIVE_FOR};
 ROBOT_STATE robotState = ROBOT_IDLE;
 
-// idle() stops the motors
+// A helper function to stop the motors
 void idle(void)
 {
   Serial.println("idle()");
   setLED(LOW);
 
-  //stop motors -- I use setEffort so that the wheels aren't locked
+  //stop motors 
   chassis.idle();
 
   //set state to idle
@@ -47,8 +47,8 @@ void drive(float dist, float speed)
 {
   Serial.println("drive()");
   setLED(HIGH);
-  robotState = ROBOT_DRIVE_FOR;
   chassis.driveFor(dist, speed);
+  robotState = ROBOT_DRIVE_FOR;
 }
 
 // A helper function to turn a set angle
@@ -56,8 +56,8 @@ void turn(float ang, float speed)
 {
   Serial.println("turn()");
   setLED(HIGH);
-  robotState = ROBOT_DRIVE_FOR;
   chassis.turnFor(ang, speed);
+  robotState = ROBOT_DRIVE_FOR;
 }
 
 // Used to check if the motions above are complete

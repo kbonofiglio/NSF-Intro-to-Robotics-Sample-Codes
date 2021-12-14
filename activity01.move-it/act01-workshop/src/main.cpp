@@ -11,6 +11,7 @@
 #include <Chassis.h>
 
 // Declare a chassis object with nominal dimensions
+// TODO: Adjust the parameters: wheel diam, encoder counts, wheel track
 Chassis chassis(7.0, 1440, 14.9);
 
 // Setup the IR receiver/decoder object
@@ -29,18 +30,61 @@ void setLED(bool value)
 enum ROBOT_STATE {ROBOT_IDLE, ROBOT_DRIVE_FOR};
 ROBOT_STATE robotState = ROBOT_IDLE;
 
-// idle() stops the motors
+// A helper function to stop the motors
 void idle(void)
 {
   Serial.println("idle()");
   setLED(LOW);
 
-  //stop motors -- I use setEffort so that the wheels aren't locked
+  //stop motors 
   chassis.idle();
 
   //set state to idle
   robotState = ROBOT_IDLE;
-  Serial.println("/idle()");
+}
+
+// A helper command to drive a set distance
+void drive(float dist, float speed)
+{
+  Serial.println("drive()");
+  setLED(HIGH);
+  chassis.driveFor(dist, speed);
+  robotState = ROBOT_DRIVE_FOR;
+}
+
+// A helper function to turn a set angle
+void turn(float ang, float speed)
+{
+  Serial.println("turn()");
+  setLED(HIGH);
+  chassis.turnFor(ang, speed);
+  robotState = ROBOT_DRIVE_FOR;
+}
+
+// Used to check if the motions above are complete
+void handleMotionComplete(void)
+{
+  idle();
+}
+
+// Handles a key press on the IR remote
+void handleKeyPress(int16_t keyPress)
+{
+  Serial.println("Key: " + String(keyPress));
+
+  //ENTER_SAVE idles, regardless of state -- E-stop
+  if(keyPress == ENTER_SAVE) idle(); 
+
+  switch(robotState)
+  {
+    case ROBOT_IDLE:
+      if(keyPress == UP_ARROW) drive(50, 10);
+      // TODO: Respond to other buttons
+      break;
+      
+    default:
+      break;
+  }
 }
 
 /*
@@ -64,50 +108,6 @@ void setup()
   decoder.init();
 
   Serial.println("/setup()");
-}
-
-// A helper command to drive a set distance
-void drive(float dist, float speed)
-{
-  setLED(HIGH);
-  robotState = ROBOT_DRIVE_FOR;
-  chassis.driveFor(dist, speed);
-}
-
-// A helper function to turn a set angle
-void turn(float ang, float speed)
-{
-  setLED(HIGH);
-  robotState = ROBOT_DRIVE_FOR;
-  chassis.turnFor(ang, speed);
-}
-
-// Used to check if the motions above are complete
-void handleMotionComplete(void)
-{
-  idle();
-}
-
-// Handles a key press on the IR remote
-void handleKeyPress(int16_t keyPress)
-{
-  Serial.println("Key: " + String(keyPress));
-
-  //ENTER_SAVE idles, regardless of state -- E-stop
-  if(keyPress == ENTER_SAVE) idle(); 
-
-  switch(robotState)
-  {
-    case ROBOT_IDLE:
-      if(keyPress == UP_ARROW) drive(50, 10);
-      else if(keyPress == DOWN_ARROW) drive(-50, 10);
-      else if(keyPress == LEFT_ARROW) turn(90, 45);
-      else if(keyPress == RIGHT_ARROW) turn(-90, 45);
-      break;
-      
-    default:
-      break;
-  }
 }
 
 /*
