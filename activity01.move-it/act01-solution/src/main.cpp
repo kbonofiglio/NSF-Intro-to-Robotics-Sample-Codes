@@ -40,35 +40,12 @@ void idle(void)
 
   //set state to idle
   robotState = ROBOT_IDLE;
-  Serial.println("/idle()");
-}
-
-/*
- * This is the standard setup function that is called when the board is rebooted
- * It is used to initialize anything that needs to be done once.
- */
-void setup() 
-{
-  // This will initialize the Serial at a baud rate of 115200 for prints
-  // Be sure to set your Serial Monitor appropriately
-  Serial.begin(115200);
-
-  // initialize the chassis (which also initializes the motors)
-  chassis.init();
-  idle();
-
-  //these can be undone for the student to adjust
-  chassis.setMotorPIDcoeffs(5, 0.5);
-
-  // initialize the IR decoder
-  decoder.init();
-
-  Serial.println("/setup()");
 }
 
 // A helper command to drive a set distance
 void drive(float dist, float speed)
 {
+  Serial.println("drive()");
   setLED(HIGH);
   robotState = ROBOT_DRIVE_FOR;
   chassis.driveFor(dist, speed);
@@ -77,6 +54,7 @@ void drive(float dist, float speed)
 // A helper function to turn a set angle
 void turn(float ang, float speed)
 {
+  Serial.println("turn()");
   setLED(HIGH);
   robotState = ROBOT_DRIVE_FOR;
   chassis.turnFor(ang, speed);
@@ -108,6 +86,29 @@ void handleKeyPress(int16_t keyPress)
     default:
       break;
   }
+}
+
+/*
+ * This is the standard setup function that is called when the board is rebooted
+ * It is used to initialize anything that needs to be done once.
+ */
+void setup() 
+{
+  // This will initialize the Serial at a baud rate of 115200 for prints
+  // Be sure to set your Serial Monitor appropriately
+  Serial.begin(115200);
+
+  // initialize the chassis (which also initializes the motors)
+  chassis.init();
+  idle();
+
+  //these can be undone for the student to adjust
+  chassis.setMotorPIDcoeffs(5, 0.5);
+
+  // initialize the IR decoder
+  decoder.init();
+
+  Serial.println("/setup()");
 }
 
 /*
