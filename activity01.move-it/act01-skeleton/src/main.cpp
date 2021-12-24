@@ -8,15 +8,16 @@
 #include <IRdecoder.h>
 #include <ir_codes.h>
 
-#include <Chassis.h>
+// TODO, Section, 4.2: Add line to include Chassis.h
 
-// Setup the IR receiver/decoder object
+// Sets up the IR receiver/decoder object
 const uint8_t IR_DETECTOR_PIN = 1;
 IRDecoder decoder(IR_DETECTOR_PIN);
 
-//TODO: set up the chassis
+// TODO, Section 4.2: Declare the chassis object (with default values)
+// TODO, Section 7.1: Adjust parameters to better match actual motion
 
-// Helper function for debugging
+// A helper function for debugging
 #define LED_PIN 13
 void setLED(bool value)
 {
@@ -24,7 +25,7 @@ void setLED(bool value)
   digitalWrite(LED_PIN, value);
 }
 
-// Define the robot states
+// Defines the robot states
 enum ROBOT_STATE {ROBOT_IDLE, ROBOT_DRIVE_FOR};
 ROBOT_STATE robotState = ROBOT_IDLE;
 
@@ -34,8 +35,8 @@ void idle(void)
   Serial.println("idle()");
   setLED(LOW);
 
-  // chassis.idle() stops the motors
-  chassis.idle();
+  // TODO, Section 4.2: Uncomment call to chassis.idle() to stop the motors
+  // chassis.idle();
 
   //set state to idle
   robotState = ROBOT_IDLE;
@@ -52,13 +53,13 @@ void setup()
   // Be sure to set your Serial Monitor appropriately
   Serial.begin(115200);
 
-  // TODO: initialize the chassis (which also initializes the motors)
+  // TODO, Section 4.2: Initialize the chassis (which also initializes the motors)
 
-  // TODO: adjust the PID coefficients
+  // TODO, Section 5.1: Adjust the PID coefficients
 
   idle();
 
-  // initialize the IR decoder
+  // Initializes the IR decoder
   decoder.init();
 
   Serial.println("/setup()");
@@ -66,15 +67,15 @@ void setup()
 
 // A helper command to drive a set distance
 // At the start, it will take no arguments and we'll hardcode a motion
-// In a Section 6, we'll edit the function definition to accept a distance and speed
+// TODO, Section 6.1 (but not before!): Edit the function definition to accept a distance and speed
 void drive(void)
 {
   setLED(HIGH);
   robotState = ROBOT_DRIVE_FOR;
 
-  // TODO: In Section 4.2, add a call to chassis.setWheelSpeeds() to test the motion
+  // TODO: In Section 4.2 and 5.1, add a call to chassis.setWheelSpeeds() to set the wheel speeds
 
-  // TODO: In Section X.X, remove the call to setWheelSpeeds() and add a call to chassis.driveFor()
+  // TODO: In Section 6.1, remove the call to setWheelSpeeds() and add a call to chassis.driveFor()
 
 }
 
@@ -84,24 +85,26 @@ void turn(float ang, float speed)
   setLED(HIGH);
   robotState = ROBOT_DRIVE_FOR;
 
-  // TODO: make a call to chassis.driveFor()
+  // TODO, Section 6.1: Make a call to chassis.turnFor()
 
 }
 
-// TODO: declare function handleMotionComplete() --> idle
+// TODO, Section 6.1: Declare function handleMotionComplete(), which calls idle()
 
 // Handles a key press on the IR remote
 void handleKeyPress(int16_t keyPress)
 {
   Serial.println("Key: " + String(keyPress));
 
-  // TODO: add "emergency stop"
-  // if(keyPress == ENTER_SAVE) idle(); 
+  // TODO, Section 3.2: add "emergency stop"
 
   switch(robotState)
   {
     case ROBOT_IDLE:
-      // TODO: handle IR keys
+      // TODO, Section 3.2: Handle up arrow button
+
+
+      // TODO, Section 6.1: Handle remaining arrows
       break;
       
     default:
@@ -115,7 +118,8 @@ void handleKeyPress(int16_t keyPress)
  */
 void loop()
 {
-  // Check for a key press on the remote
+  // Checks for a key press on the remote
+  // TODO, Section 3.1: Temporarily edit to pass true to getKeyCode()
   int16_t keyPress = decoder.getKeyCode();
   if(keyPress >= 0) handleKeyPress(keyPress);
 
@@ -124,7 +128,7 @@ void loop()
   {
     case ROBOT_DRIVE_FOR: 
 
-      // TODO: uncomment in Section ??
+      // TODO, Section 6.1: Uncomment to handle completed motion
       // if(chassis.checkMotionComplete()) handleMotionComplete(); 
       break;
 
