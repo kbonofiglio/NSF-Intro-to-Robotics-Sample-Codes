@@ -34,7 +34,8 @@ void idle(void)
   Serial.println("idle()");
   setLED(LOW);
 
-  // TODO: call chassis.idle() to stop the motors
+  // chassis.idle() stops the motors
+  chassis.idle();
 
   //set state to idle
   robotState = ROBOT_IDLE;
