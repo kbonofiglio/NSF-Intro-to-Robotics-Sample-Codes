@@ -64,7 +64,8 @@ void setup()
 }
 
 // A helper command to drive a set distance
-void drive(float dist, float speed)
+// TODO: In a Section 6, edit to take a distance and speed
+void drive(void)
 {
   setLED(HIGH);
   robotState = ROBOT_DRIVE_FOR;
@@ -91,7 +92,7 @@ void handleKeyPress(int16_t keyPress)
   Serial.println("Key: " + String(keyPress));
 
   // TODO: add "emergency stop"
-  //if(keyPress == ENTER_SAVE) idle(); 
+  // if(keyPress == ENTER_SAVE) idle(); 
 
   switch(robotState)
   {
@@ -110,9 +111,6 @@ void handleKeyPress(int16_t keyPress)
  */
 void loop()
 {
-  // TODO: uncomment this line once the chassis is set up
-  // chassis.loop();
-
   // Check for a key press on the remote
   int16_t keyPress = decoder.getKeyCode();
   if(keyPress >= 0) handleKeyPress(keyPress);
@@ -121,8 +119,10 @@ void loop()
   switch(robotState)
   {
     case ROBOT_DRIVE_FOR: 
-       //if(chassis.checkMotionComplete()) handleMotionComplete(); 
-       break;
+
+      // TODO: uncomment in Section ??
+      // if(chassis.checkMotionComplete()) handleMotionComplete(); 
+      break;
 
     default:
       break;
