@@ -64,13 +64,16 @@ void setup()
 }
 
 // A helper command to drive a set distance
-// TODO: In a Section 6, edit to take a distance and speed
+// At the start, it will take no arguments and we'll hardcode a motion
+// In a Section 6, we'll edit the function definition to accept a distance and speed
 void drive(void)
 {
   setLED(HIGH);
   robotState = ROBOT_DRIVE_FOR;
 
-  // TODO: make a call to chassis.driveFor()
+  // TODO: In Section 4.2, add a call to chassis.setWheelSpeeds() to test the motion
+
+  // TODO: In Section X.X, remove the call to setWheelSpeeds() and add a call to chassis.driveFor()
 
 }
 
