@@ -15,7 +15,7 @@ const uint8_t IR_DETECTOR_PIN = 1;
 IRDecoder decoder(IR_DETECTOR_PIN);
 
 // TODO, Section 4.2: Declare the chassis object (with default values)
-// TODO, Section 7.1: Adjust parameters to better match actual motion
+// TODO, Section 6.2: Adjust parameters to better match actual motion
 
 // A helper function for debugging
 #define LED_PIN 13
