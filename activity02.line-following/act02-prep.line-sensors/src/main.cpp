@@ -1,5 +1,5 @@
 /*
- * Simple code to read the line sensors.
+ * Simple code to read the line sensors. Used in Activity 2, Staying on Track, Section 4.3.
  */ 
 
 #include <Arduino.h>
