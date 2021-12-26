@@ -1,7 +1,7 @@
 /*
  * Activity 02 -- Staying on track
  *
- * Line following with speed control. Pauses at an intersection and waits for a turn command.
+ * Line following with speed control. Pauses at an intersection and waits for a command.
  */ 
 
 #include <Arduino.h>
@@ -29,7 +29,8 @@ void setLED(bool value)
 }
 
 // Define the robot states
-enum ROBOT_STATE {ROBOT_IDLE, ROBOT_DRIVE_FOR, ROBOT_LINE_FOLLOWING};
+// TODO, Section 5.2: Define a state for line following
+enum ROBOT_STATE {ROBOT_IDLE, ROBOT_DRIVE_FOR};
 ROBOT_STATE robotState = ROBOT_IDLE;
 
 // A helper function to stop the motors
@@ -50,8 +51,8 @@ void drive(float dist, float speed)
 {
   Serial.println("drive()");
   setLED(HIGH);
-  chassis.driveFor(dist, speed);
   robotState = ROBOT_DRIVE_FOR;
+  chassis.driveFor(dist, speed);
 }
 
 // A helper function to turn a set angle
@@ -59,11 +60,11 @@ void turn(float ang, float speed)
 {
   Serial.println("turn()");
   setLED(HIGH);
-  chassis.turnFor(ang, speed);
   robotState = ROBOT_DRIVE_FOR;
+  chassis.turnFor(ang, speed);
 }
 
-// Used to check if the motions above are complete
+// Used to handle when the motions are complete
 void handleMotionComplete(void)
 {
   idle();
@@ -86,32 +87,30 @@ void handleKeyPress(int16_t keyPress)
       else if(keyPress == RIGHT_ARROW) turn(-90, 45);
       break;
       
-    case ROBOT_LINE_FOLLOWING:
-      // TODO: respond to speed +/- commands
-      break;
+    // TODO, Section 5.3: respond to speed +/- commands (when in ROBOT_LINING state)
  
      default:
       break;
   }
 }
 
-uint16_t darkThreshold = 500;
-float speed = 180;
+// TODO, Section 5.2: Define a baseSpeed
 
 void handleLineFollowing(float baseEffort)
 {
-  // TODO: add line following control
+  // TODO, Section 5.2: Add line following control
 }
 
-// //here's a nice opportunity to introduce boolean logic
-bool checkIntersectionEvent(int16_t darkThreshold)
+// TODO, Section 6.1: Define a darkThreshold
+
+bool checkIntersectionEvent(uint16_t darkThreshold)
 {
   static bool prevIntersection = false;
 
   bool retVal = false;
 
-  //TODO: add logic for detecting intersection
-
+  // TODO, Section 6.1: Add logic to check for intersection
+  
   return retVal;
 }
 
@@ -119,7 +118,7 @@ void handleIntersection(void)
 {
   Serial.println("Intersection!");
 
-  // TODO: add a line to drive forward to center the robot
+  // TODO, Section 6.1: add a line to drive forward to center the robot
   
 
   robotState = ROBOT_DRIVE_FOR;
@@ -145,6 +144,10 @@ void setup()
   // initialize the IR decoder
   decoder.init();
 
+  // Ensure the line sesnors are inputs
+  pinMode(LEFT_LINE_SENSE, INPUT);
+  pinMode(RIGHT_LINE_SENSE, INPUT);
+
   Serial.println("/setup()");
 }
 
@@ -154,9 +157,6 @@ void setup()
  */
 void loop()
 {
-  // Call chassis.loop() to update the chassis, motors, etc.
-  chassis.loop();
-
   // Check for a key press on the remote
   int16_t keyPress = decoder.getKeyCode();
   if(keyPress >= 0) handleKeyPress(keyPress);
@@ -168,10 +168,9 @@ void loop()
        if(chassis.checkMotionComplete()) handleMotionComplete(); 
        break;
 
-    case ROBOT_LINE_FOLLOWING:
-      handleLineFollowing(speed); //argument is base speed
-      if(checkIntersectionEvent(darkThreshold)) handleIntersection();
-      break;
+    // TODO, Section 5.2: Add a case to handle line following
+
+    // TODO, Section 6.1: check/handle intersection
 
     default:
       break;
