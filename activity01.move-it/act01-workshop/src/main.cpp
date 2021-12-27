@@ -10,8 +10,8 @@
 
 #include <Chassis.h>
 
-// Declare a chassis object with nominal dimensions
-// TODO: Adjust the parameters: wheel diam, encoder counts, wheel track
+// Declares a chassis object with nominal dimensions
+// TODO, Section 6.2: Adjust the parameters: wheel diam, encoder counts, wheel track
 Chassis chassis(7.0, 1440, 14.9);
 
 // Setup the IR receiver/decoder object
@@ -48,8 +48,10 @@ void drive(float dist, float speed)
 {
   Serial.println("drive()");
   setLED(HIGH);
-  chassis.driveFor(dist, speed);
   robotState = ROBOT_DRIVE_FOR;
+
+  // TODO: In Section 6.1, remove the call to setWheelSpeeds() and add a call to chassis.driveFor()
+  chassis.setWheelSpeeds(180, 180);
 }
 
 // A helper function to turn a set angle
@@ -57,8 +59,9 @@ void turn(float ang, float speed)
 {
   Serial.println("turn()");
   setLED(HIGH);
-  chassis.turnFor(ang, speed);
   robotState = ROBOT_DRIVE_FOR;
+
+  // TODO, Section 6.1: Make a call to chassis.turnFor()
 }
 
 // Used to check if the motions above are complete
@@ -79,7 +82,7 @@ void handleKeyPress(int16_t keyPress)
   {
     case ROBOT_IDLE:
       if(keyPress == UP_ARROW) drive(50, 10);
-      // TODO: Respond to other buttons
+      // TODO, Section 6.1: Handle other arrow buttons
       break;
       
     default:
@@ -116,9 +119,6 @@ void setup()
  */
 void loop()
 {
-  // Call chassis.loop() to update the chassis, motors, etc.
-  chassis.loop();
-
   // Check for a key press on the remote
   int16_t keyPress = decoder.getKeyCode();
   if(keyPress >= 0) handleKeyPress(keyPress);

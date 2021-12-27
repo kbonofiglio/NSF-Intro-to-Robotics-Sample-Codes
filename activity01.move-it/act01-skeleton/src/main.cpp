@@ -8,16 +8,16 @@
 #include <IRdecoder.h>
 #include <ir_codes.h>
 
-#include <Chassis.h>
+// TODO, Section, 4.2: Add line to include Chassis.h
 
-// Setup the IR receiver/decoder object
+// Sets up the IR receiver/decoder object
 const uint8_t IR_DETECTOR_PIN = 1;
 IRDecoder decoder(IR_DETECTOR_PIN);
 
 //Set up the chassis
 Chassis chassis(7.0, 1440, 14.7);
 
-// Helper function for debugging
+// A helper function for debugging
 #define LED_PIN 13
 void setLED(bool value)
 {
@@ -25,7 +25,7 @@ void setLED(bool value)
   digitalWrite(LED_PIN, value);
 }
 
-// Define the robot states
+// Defines the robot states
 enum ROBOT_STATE {ROBOT_IDLE, ROBOT_DRIVE_FOR};
 ROBOT_STATE robotState = ROBOT_IDLE;
 
@@ -61,14 +61,16 @@ void setup()
 
   idle();
 
-  // initialize the IR decoder
+  // Initializes the IR decoder
   decoder.init();
 
   Serial.println("/setup()");
 }
 
 // A helper command to drive a set distance
-void drive(float dist, float speed)
+// At the start, it will take no arguments and we'll hardcode a motion
+// TODO, Section 6.1 (but not before!): Edit the function definition to accept a distance and speed
+void drive(void)
 {
   setLED(HIGH);
   robotState = ROBOT_DRIVE_FOR;
@@ -86,11 +88,11 @@ void turn(float ang, float speed)
   setLED(HIGH);
   robotState = ROBOT_DRIVE_FOR;
 
-  // TODO: make a call to chassis.driveFor()
+  // TODO, Section 6.1: Make a call to chassis.turnFor()
 
 }
 
-// TODO: declare function handleMotionComplete() --> idle
+// TODO, Section 6.1: Declare function handleMotionComplete(), which calls idle()
 
 // Handles a key press on the IR remote
 void handleKeyPress(int16_t keyPress)
@@ -117,10 +119,8 @@ void handleKeyPress(int16_t keyPress)
  */
 void loop()
 {
-  // TODO: uncomment this line once the chassis is set up
-  // chassis.loop();
-
-  // Check for a key press on the remote
+  // Checks for a key press on the remote
+  // TODO, Section 3.1: Temporarily edit to pass true to getKeyCode()
   int16_t keyPress = decoder.getKeyCode();
   if(keyPress >= 0) handleKeyPress(keyPress);
 
@@ -128,8 +128,10 @@ void loop()
   switch(robotState)
   {
     case ROBOT_DRIVE_FOR: 
-       //if(chassis.checkMotionComplete()) handleMotionComplete(); 
-       break;
+
+      // TODO, Section 6.1: Uncomment to handle completed motion
+      // if(chassis.checkMotionComplete()) handleMotionComplete(); 
+      break;
 
     default:
       break;
