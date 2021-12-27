@@ -14,7 +14,8 @@
 const uint8_t IR_DETECTOR_PIN = 1;
 IRDecoder decoder(IR_DETECTOR_PIN);
 
-//TODO: set up the chassis
+//Set up the chassis
+Chassis chassis(7.0, 1440, 14.7);
 
 // Helper function for debugging
 #define LED_PIN 13
@@ -35,6 +36,7 @@ void idle(void)
   setLED(LOW);
 
   // TODO: call chassis.idle() to stop the motors
+  chassis.idle();
 
   //set state to idle
   robotState = ROBOT_IDLE;
@@ -51,9 +53,11 @@ void setup()
   // Be sure to set your Serial Monitor appropriately
   Serial.begin(115200);
 
-  // TODO: initialize the chassis (which also initializes the motors)
+  // Initialize the chassis (which also initializes the motors)
+  chassis.init();
 
   // TODO: adjust the PID coefficients
+  chassis.setMotorPIDcoeffs(5, 0.5);
 
   idle();
 
@@ -70,6 +74,9 @@ void drive(float dist, float speed)
   robotState = ROBOT_DRIVE_FOR;
 
   // TODO: make a call to chassis.driveFor()
+  Serial.println("I should be driving!");
+  chassis.driveFor(dist, speed);
+  //chassis.setMotorEfforts(60, 60);
 
 }
 
@@ -91,12 +98,12 @@ void handleKeyPress(int16_t keyPress)
   Serial.println("Key: " + String(keyPress));
 
   // TODO: add "emergency stop"
-  //if(keyPress == ENTER_SAVE) idle(); 
+  if(keyPress == ENTER_SAVE) idle(); 
 
   switch(robotState)
   {
     case ROBOT_IDLE:
-      // TODO: handle IR keys
+      if(keyPress == UP_ARROW) drive(50, 10);
       break;
       
     default:
