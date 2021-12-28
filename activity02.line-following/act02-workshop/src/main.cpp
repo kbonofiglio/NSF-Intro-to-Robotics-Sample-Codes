@@ -13,7 +13,7 @@
 #include <Chassis.h>
 
 // Declare a chassis object with nominal dimensions
-// TODO: Adjust the parameters: wheel diam, encoder counts, wheel track
+// TODO, Section 5.2: Adjust the kinematic parameters to what you found in the previous activity
 Chassis chassis(7.0, 1440, 14.9);
 
 // Setup the IR receiver/decoder object
@@ -32,6 +32,9 @@ void setLED(bool value)
 // TODO, Section 5.2: Define a state for line following
 enum ROBOT_STATE {ROBOT_IDLE, ROBOT_DRIVE_FOR};
 ROBOT_STATE robotState = ROBOT_IDLE;
+
+// TODO, Section 5.2: Define a baseSpeed
+
 
 // A helper function to stop the motors
 void idle(void)
@@ -85,18 +88,20 @@ void handleKeyPress(int16_t keyPress)
       else if(keyPress == DOWN_ARROW) drive(-50, 10);
       else if(keyPress == LEFT_ARROW) turn(90, 45);
       else if(keyPress == RIGHT_ARROW) turn(-90, 45);
+
+      //TODO, Section 5.2: Respond to SETUP_BTN press
+    
       break;
       
     // TODO, Section 5.3: respond to speed +/- commands (when in ROBOT_LINING state)
+    // Use the VOLplus and VOLminus keys on your IR remote
  
      default:
       break;
   }
 }
 
-// TODO, Section 5.2: Define a baseSpeed
-
-void handleLineFollowing(float baseEffort)
+void handleLineFollowing(float baseSpeed)
 {
   // TODO, Section 5.2: Add line following control
 }
@@ -138,10 +143,10 @@ void setup()
   chassis.init();
   idle();
 
-  //these can be undone for the student to adjust
+  // These values should work well, though you may want to use what you found in the previous activity
   chassis.setMotorPIDcoeffs(5, 0.5);
 
-  // initialize the IR decoder
+  // Initialize the IR decoder
   decoder.init();
 
   // Ensure the line sesnors are inputs
