@@ -1,0 +1,263 @@
+/*
+ * Activity 03 -- Heavy lifting
+ *
+ * Line following with speed control. Pauses at an intersection and waits for a command.
+ */ 
+
+#include <Arduino.h>
+#include <wpi-32u4-lib.h>
+
+#include <IRdecoder.h>
+#include <ir_codes.h>
+
+#include <Chassis.h>
+#include <servo32u4.h>
+
+#include <Rangefinder.h>
+
+// Declare a chassis object with nominal dimensions
+// TODO: Adjust the parameters: wheel diam, encoder counts, wheel track
+Chassis chassis(7.0, 1440, 14.9);
+
+// Setup the IR receiver/decoder object
+const uint8_t IR_DETECTOR_PIN = 1;
+IRDecoder decoder(IR_DETECTOR_PIN);
+
+Rangefinder rangefinder(11, 4);
+
+Servo32U4 servo;
+
+// Declare variables to hold the limits for the servo
+#define SERVO_DOWN 500
+#define SERVO_UP 2500
+
+// Helper function for debugging
+#define LED_PIN 13
+void setLED(bool value)
+{
+  Serial.println("setLED()");
+  digitalWrite(LED_PIN, value);
+}
+
+// Define the robot states
+// TODO, Section 5.2: Define a state for line following
+enum ROBOT_STATE {ROBOT_IDLE, ROBOT_DRIVE_FOR, ROBOT_LINING, ROBOT_BAGGING};
+ROBOT_STATE robotState = ROBOT_IDLE;
+
+// A helper function to stop the motors
+void idle(void)
+{
+  Serial.println("idle()");
+  setLED(LOW);
+
+  //stop motors 
+  chassis.idle();
+
+  //set state to idle
+  robotState = ROBOT_IDLE;
+}
+
+// A helper command to drive a set distance
+void drive(float dist, float speed)
+{
+  Serial.println("drive()");
+  setLED(HIGH);
+  robotState = ROBOT_DRIVE_FOR;
+  chassis.driveFor(dist, speed);
+}
+
+// A helper function to turn a set angle
+void turn(float ang, float speed)
+{
+  Serial.println("turn()");
+  setLED(HIGH);
+  robotState = ROBOT_DRIVE_FOR;
+  chassis.turnFor(ang, speed);
+}
+
+// Used to handle when the motions are complete
+void handleMotionComplete(void)
+{
+  idle();
+}
+
+float baseSpeed = 60;
+// Handles a key press on the IR remote
+void handleKeyPress(int16_t keyPress)
+{
+  Serial.println("Key: " + String(keyPress));
+
+  //ENTER_SAVE idles, regardless of state -- E-stop
+  if(keyPress == ENTER_SAVE) idle(); 
+
+  switch(robotState)
+  {
+    case ROBOT_IDLE:
+      if(keyPress == UP_ARROW) drive(50, 10);
+      else if(keyPress == DOWN_ARROW) drive(-50, 10);
+      else if(keyPress == LEFT_ARROW) turn(90, 45);
+      else if(keyPress == RIGHT_ARROW) turn(-90, 45);
+      else if(keyPress == PLAY_PAUSE) robotState = ROBOT_LINING;
+      else if(keyPress == REWIND){
+        Serial.println("right key");
+        servo.writeMicroseconds(SERVO_UP);
+        robotState = ROBOT_BAGGING;
+        Serial.println(robotState);
+      }
+      break;
+      
+    // TODO, Section 5.3: respond to speed +/- commands (when in ROBOT_LINING state)
+    case ROBOT_LINING:
+      if(keyPress == VOLplus) baseSpeed += 10;
+      else if(keyPress == VOLminus) baseSpeed -= 10;
+      break;
+
+    case ROBOT_BAGGING:
+      Serial.println("bagging key pressed");
+      break;
+ 
+    default:
+      break;
+  }
+}
+
+// Section 5.2: Define a baseSpeed
+
+
+void handleLineFollowing(float baseEffort)
+{
+  // Section 5.2: Add line following control
+  float K_p = 0.05;
+  float error = analogRead(LEFT_LINE_SENSE) - analogRead(RIGHT_LINE_SENSE);
+  float turnEffort = error * K_p;
+
+  chassis.setMotorEfforts(baseEffort + turnEffort, baseEffort - turnEffort);
+}
+
+// TODO, Section 6.1: Define a darkThreshold
+
+bool checkIntersectionEvent(uint16_t darkThreshold)
+{
+  static bool prevIntersection = false;
+
+  bool retVal = false;
+
+  // TODO, Section 6.1: Add logic to check for intersection
+  bool leftDetect = analogRead(LEFT_LINE_SENSE) > darkThreshold ? true : false;
+  bool rightDetect = analogRead(RIGHT_LINE_SENSE) > darkThreshold ? true : false;
+
+  bool intersection = leftDetect && rightDetect;
+  if(intersection && !prevIntersection) retVal = true;
+  prevIntersection = intersection;
+  
+  return retVal;
+}
+
+void handleIntersection(void)
+{
+  Serial.println("Intersection!");
+
+  // TODO, Section 6.1: add a line to drive forward to center the robot
+  drive(7, baseSpeed);  
+
+  robotState = ROBOT_DRIVE_FOR;
+}
+
+bool checkForBag(void)
+{
+  float BAG_DISTANCE_THRESHOLD = 10;
+  static float prevDistance = 0;
+
+  bool retVal = false;
+
+  float currDistance = rangefinder.getDistance();
+  
+  if(prevDistance > BAG_DISTANCE_THRESHOLD && currDistance <= BAG_DISTANCE_THRESHOLD) retVal = true;
+
+  prevDistance = currDistance;
+  
+  return retVal;
+
+}
+
+void pickUpBag(void){
+  servo.setMinMaxMicroseconds(SERVO_DOWN, SERVO_UP);
+
+  servo.writeMicroseconds(SERVO_DOWN);
+  delay(2000);
+  servo.writeMicroseconds(SERVO_UP);
+  delay(2000);
+
+  robotState = ROBOT_IDLE;
+}
+
+/*
+ * This is the standard setup function that is called when the board is rebooted
+ * It is used to initialize anything that needs to be done once.
+ */
+void setup() 
+{
+  // This will initialize the Serial at a baud rate of 115200 for prints
+  // Be sure to set your Serial Monitor appropriately
+  Serial.begin(115200);
+
+  // initialize the chassis (which also initializes the motors)
+  chassis.init();
+  idle();
+
+  //these can be undone for the student to adjust
+  chassis.setMotorPIDcoeffs(5, 0.5);
+
+  // initialize the IR decoder
+  decoder.init();
+
+  rangefinder.init();
+
+  // Ensure the line sesnors are inputs
+  pinMode(LEFT_LINE_SENSE, INPUT);
+  pinMode(RIGHT_LINE_SENSE, INPUT);
+
+  Serial.println("/setup()");
+}
+
+/*
+ * The main loop for the program. The loop function is repeatedly called
+ * after setup() is complete.
+ */
+void loop()
+{
+  // Check for a key press on the remote
+  int16_t keyPress = decoder.getKeyCode();
+  if(keyPress >= 0) handleKeyPress(keyPress);
+
+  // A basic state machine
+  switch(robotState)
+  {
+    case ROBOT_DRIVE_FOR: 
+    {
+      if(chassis.checkMotionComplete()) handleMotionComplete(); 
+      break;
+    }
+      // Section 5.2: Add a case to handle line following
+    case ROBOT_LINING:
+    {
+      handleLineFollowing(baseSpeed);
+      // TODO, Section 6.1: check/handle intersection
+      float DARK_THRESHOLD = 550;
+      if(checkIntersectionEvent(DARK_THRESHOLD)) handleIntersection();
+      break;
+    }
+    case ROBOT_BAGGING:
+    {
+      handleLineFollowing(baseSpeed);
+      Serial.println(rangefinder.getDistance());
+      if(checkForBag()){
+        chassis.setMotorEfforts(0, 0);
+        pickUpBag();
+      }
+      break;
+    }
+    default:
+      break;
+  }
+}
