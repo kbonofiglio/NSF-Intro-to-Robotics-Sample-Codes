@@ -15,12 +15,11 @@ void setup()
 
   // Call attach() to set up the servo
   servo.attach();
+  servo.setMinMaxMicroseconds(SERVO_DOWN, SERVO_UP);
 }
 
 void loop() 
 {
-  servo.setMinMaxMicroseconds(SERVO_DOWN, SERVO_UP);
-
   servo.writeMicroseconds(SERVO_DOWN);
   delay(2000);
   servo.writeMicroseconds(SERVO_UP);
