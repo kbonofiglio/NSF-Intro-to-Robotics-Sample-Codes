@@ -51,7 +51,7 @@ void drive(float dist, float speed)
   robotState = ROBOT_DRIVE_FOR;
 
   // TODO: In Section 6.1, remove the call to setWheelSpeeds() and add a call to chassis.driveFor()
-  chassis.setWheelSpeeds(180, 180);
+  chassis.setWheelSpeeds(10, 10);
 }
 
 // A helper function to turn a set angle
@@ -109,6 +109,7 @@ void setup()
 
   // initialize the IR decoder
   decoder.init();
+
 
   Serial.println("/setup()");
 }
